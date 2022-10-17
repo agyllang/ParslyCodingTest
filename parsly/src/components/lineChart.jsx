@@ -12,9 +12,9 @@ import {
 import React from "react";
 
 const CustomizedDot = (props) => {
-  const { cx, cy, value } = props;
+  const { cx, cy, value,max,min } = props;
   // console.log("value", value);
-  if (value > 22 && value < 30) {
+  if (value > min && value < max) {
     return (
       <svg
         x={cx - 5}
@@ -27,7 +27,7 @@ const CustomizedDot = (props) => {
         <circle cx="150" cy="150" r="150" />
       </svg>
     );
-  } else if (value < 22) {
+  } else if (value < min) {
     return (
       <svg
       x={cx - 5}
@@ -57,7 +57,7 @@ const CustomizedDot = (props) => {
 };
 
 const LineChartGraph = (props) => {
-  const { data } = props;
+  const { data,tempMax,tempMin } = props;
 
   // console.log("data", data);
   return (
@@ -79,14 +79,14 @@ const LineChartGraph = (props) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <ReferenceLine y={28} label="Max" stroke="red" />
-          <ReferenceLine y={22} label="Min" stroke="blue" />
+          <ReferenceLine y={tempMax} label="Max temperature" stroke="red" />
+          <ReferenceLine y={tempMin} label="Min temperature" stroke="blue" />
           <Line
             isAnimationActive={false}
             type="monotone"
             dataKey="temp"
             stroke="#000"
-            dot={<CustomizedDot />}
+            dot={<CustomizedDot max={tempMax} min={tempMin} />}
           />
           {/* <Line type="monotone" dataKey="uv" stroke="#82ca9d" /> */}
         </LineChart>
