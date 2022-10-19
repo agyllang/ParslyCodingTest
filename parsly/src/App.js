@@ -69,16 +69,15 @@ const App = () => {
   const [data, setData] = useState([]);
   const [events, setEvents] = useState([]);
 
-  // limit for data values
-  const [tempMax, setTempMax] = useState(30);
-  const [tempMin, setTempMin] = useState(15);
+  // limit for data values, used for triggering events
+  const tempMin = 15,
+    tempMax = 30;
 
-  const [humidMax, setHumidMax] = useState(80);
-  const [humidMin, setHumidMin] = useState(50);
+  const humidMin = 50,
+    humidMax = 80;
 
-  const [wndSpdMax, setWSPDMax] = useState(5);
-  const [wndSpdMin, setWSPDMin] = useState(1);
-
+  const wndSpdMin = 1,
+    wndSpdMax = 5;
 
   //timestamp reference which increases every interval loop, used to fetch data from one day later
   // 1622592060000= 2021-06-01
@@ -86,7 +85,6 @@ const App = () => {
   const newTS = useRef(1622592060000);
 
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWeatherData = async (startDate, endDate) => {
@@ -113,7 +111,6 @@ const App = () => {
         setError(err.message);
         setData([]);
       } finally {
-        setLoading(false);
       }
     };
     const interval = setInterval(() => {
@@ -133,12 +130,12 @@ const App = () => {
   useEffect(() => {
     if (data.length > 0) {
       var recentData = [...data].pop();
-      var tempCheck = checkDataSeverity(
-        "Temperature",
-        recentData.temp,
-        tempMin,
-        tempMax
-      );
+      // var tempCheck = checkDataSeverity(
+      //   "Temperature",
+      //   recentData.temp,
+      //   tempMin,
+      //   tempMax
+      // );
       var minTempCheck = checkDataSeverity(
         "Daily min temperature",
         recentData.min_temp,

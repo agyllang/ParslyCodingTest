@@ -59,7 +59,6 @@ const EventList = (props) => {
   const [focusedIndex, setFocused] = useState();
 
   const handleFocus = (index) => {
-    // console.log("handleFocus");
     if (index === focusedIndex) {
       setFocused();
     } else {
