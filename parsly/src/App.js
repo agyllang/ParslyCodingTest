@@ -1,23 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
-
 import { Row, Col, Container } from "react-bootstrap";
 import "./App.css";
+import { timestampConvert } from "./components/utilities";
+
 import NavBar from "./components/navbar";
-import LineChartGraph from "./components/lineChart";
+import Graphs from "./components/graphs";
 import DataList from "./components/dataList";
 import EventList from "./components/eventList";
+
 const API_KEY = process.env.REACT_APP_API_KEY;
-// console.log("api key", API_KEY);
-const timestampConvert = (UNIX_timestamp) => {
-  var dateformat8601 = new Date(UNIX_timestamp).toISOString().slice(0, 10);
 
-  return dateformat8601;
-};
-
-const severityCalculator = (val, comparator, medianComparator) => {
+const severityCalculator = (val, limit, median) => {
   //function calculate the offset of a value from a certain interval
-  var difference = Math.abs(comparator - val);
-  var fraction = difference / medianComparator;
+  var difference = Math.abs(limit - val);
+  var fraction = difference / median;
   var roundUp = Math.abs(Math.round((fraction + Number.EPSILON) * 100) / 100);
   return roundUp;
 };
@@ -27,6 +23,7 @@ const severityToText = (val) => {
   else if (val > 0.15) text = "Error";
   return text;
 };
+
 const checkDataSeverity = (property, val, lowerLimit, upperLimit) => {
   var message = "";
   var severityStatus = false;
@@ -70,359 +67,6 @@ const checkDataSeverity = (property, val, lowerLimit, upperLimit) => {
 
 const App = () => {
   const [data, setData] = useState([]);
-  // const [data, setData] = useState([
-  //   {
-  //     rh: 70.2,
-  //     wind_spd: 3.8,
-  //     max_wind_spd: 6.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 30,
-  //     max_uv: 5,
-  //     datetime: "2022-10-08",
-  //     temp: 25.86,
-  //     min_temp: 23,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 30.2,
-  //     wind_spd: 3.8,
-  //     max_wind_spd: 6.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 32,
-  //     max_uv: 5,
-  //     datetime: "2022-10-09",
-  //     temp: 27.86,
-  //     min_temp: 20,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-10",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-11",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-12",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-13",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-15",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-16",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-17",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-17",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-18",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  //   {
-  //     rh: 50.2,
-  //     wind_spd: 4.8,
-  //     max_wind_spd: 5.7,
-  //     min_temp_ts: 1483272000,
-  //     max_temp_ts: 1483308000,
-  //     dewpt: 1.8,
-  //     max_temp: 20,
-  //     max_uv: 5,
-  //     datetime: "2022-10-14",
-  //     temp: 17.86,
-  //     min_temp: 5,
-  //     ts: 1483228800,
-  //   },
-  // ]);
-  console.log("state data:", data);
   const [events, setEvents] = useState([]);
 
   // limit for data values
@@ -435,24 +79,20 @@ const App = () => {
   const [wndSpdMax, setWSPDMax] = useState(5);
   const [wndSpdMin, setWSPDMin] = useState(1);
 
-  console.log("events", events);
 
   //timestamp reference which increases every interval loop, used to fetch data from one day later
   // 1622592060000= 2021-06-01
-  // const increasingTS = useRef(1622592060000);
   const oldTS = useRef(1622505660000);
   const newTS = useRef(1622592060000);
-  // console.log(increasingTS.current);
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWeatherData = async (startDate, endDate) => {
-      // var url = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${API_KEY}&include=minutely`;
-      // var url = `https://api.weatherbit.io/v2.0/history/daily?lat=${lat}&lon=${lon}&start_date=2021-06-01&end_date=2021-07-20&key=${API_KEY}`;
       var lat = 59.3294;
       var lon = 18.0686;
+      //lat,lon for Stockholm
       var url = `https://api.weatherbit.io/v2.0/history/daily?lat=${lat}&lon=${lon}&start_date=${startDate}&end_date=${endDate}&key=${API_KEY}`;
       try {
         const response = await fetch(url);
@@ -461,12 +101,17 @@ const App = () => {
             `This is an HTTP error: The status is ${response.status}`
           );
         }
-        let data = await response.json();
+        var data = await response.json();
+
+        data.data[0].tempChange = [
+          data.data[0].min_temp,
+          data.data[0].max_temp,
+        ];
         setData((prevState) => [...prevState, data.data[0]]);
         setError(null);
       } catch (err) {
         setError(err.message);
-        setData(null);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -479,6 +124,7 @@ const App = () => {
 
       newTS.current += 86400000;
       var endDate = timestampConvert(newTS.current);
+
       fetchWeatherData(startDate, endDate);
     }, 10000);
     return () => clearInterval(interval);
@@ -490,6 +136,18 @@ const App = () => {
       var tempCheck = checkDataSeverity(
         "Temperature",
         recentData.temp,
+        tempMin,
+        tempMax
+      );
+      var minTempCheck = checkDataSeverity(
+        "Daily min temperature",
+        recentData.min_temp,
+        tempMin,
+        tempMax
+      );
+      var maxTempCheck = checkDataSeverity(
+        "Daily max temperature",
+        recentData.max_temp,
         tempMin,
         tempMax
       );
@@ -506,7 +164,12 @@ const App = () => {
         wndSpdMax
       );
 
-      var checkedProperties = [tempCheck, humidityCheck, windCheck];
+      var checkedProperties = [
+        minTempCheck,
+        maxTempCheck,
+        humidityCheck,
+        windCheck,
+      ];
       //filtering data based on severity
       var severityArray = checkedProperties.filter((i) => {
         return i.severityStatus === true;
@@ -548,17 +211,25 @@ const App = () => {
   return (
     <div className="App">
       <NavBar />
-      <Row>
-        <Col md={6}>
-          <LineChartGraph data={data} tempMax={tempMax} tempMin={tempMin} />
-        </Col>
-        <Col md={6}>
-          <DataList data={data} />
-        </Col>
-      </Row>
-      <Row>
-        <EventList events={events} />
-      </Row>
+      {error != null && error.length > 0 && <div> {error}</div>}
+      <Container fluid>
+        <Row>
+          <Col lg={8} md={6} xs={{ span: 12 }}>
+            <Graphs
+              data={data}
+              tempMax={tempMax}
+              tempMin={tempMin}
+              humidMax={humidMax}
+              humidMin={humidMin}
+              wndSpdMax={wndSpdMax}
+            />
+          </Col>
+          <Col lg={4} md={6}>
+            <EventList events={events} />
+            <DataList data={data} />
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };

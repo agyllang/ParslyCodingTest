@@ -29,12 +29,22 @@
 
 /* Lists */
 .datalist-container {
-  height: 50vh;
+  height: 30vh;
   overflow: hidden;
   overflow-y: scroll;
 }
-
+.column-header{
+  font-weight:600;
+}
+.column-header2{
+  font-weight:600;
+  color: rgb(111, 111, 114)
+}
+.event-info{
+  font-weight:300;
+}
 .row-item {
   /* margin: 1px !important; */
   cursor: pointer;
 }
+

@@ -1,70 +1,52 @@
 import React, { useState } from "react";
 
 import { Row, Col, Container } from "react-bootstrap";
+import { eventPropertyInfo } from "./utilities";
 
-const eventPropertyInfo = (property) => {
-  var propertyObj = { info: "", unit: "" };
-  if (property === "Temperature") {
-    propertyObj.info =
-      "Temperatures below/above the limits may impede the parsley plant to cultivate.";
-    propertyObj.unit = " °C";
-  }
-
-  if (property === "Humidity") {
-    propertyObj.info =
-      "Humidity below/above the limits may damage the parsley plant.";
-    propertyObj.unit = "%";
-  }
-
-  if (property === "Wind speed") {
-    propertyObj.info = "Wind speed levels above the limits can break the plant";
-    propertyObj.unit = "m/s";
-  }
-  return propertyObj;
+const severityColor = (severity) => {
+  if (severity === "Warning") return "#ffcc00";
+  if (severity === "Error") return "#ff9966";
+  if (severity === "Critical") return "#cc3300";
 };
 
 const EventDetail = ({ event }) => {
   console.log("data detals data", event);
+
+  var eventProperty = eventPropertyInfo(event.dataProperty);
   return (
     <Container style={{ marginTop: "1rem" }}>
-      <Row>
-        {/* <Col style={{ display: "flex", justifyContent: "center" }}> */}
-        <Col>
-          <h5></h5>
-        </Col>
-      </Row>
-
       <Row style={{ borderBottom: "2px solid #c6c6c6" }}>
-        <Col className="list-column-header">Event data</Col>
+        <Col className="column-header">Event data</Col>
       </Row>
       <Row>
         {(event !== null || undefined) && Object.keys(event).length > 0 && (
-          <Row
-            // key={`eventdetail-item${index}`}
-            style={{
-              backgroundColor: "#ffffff",
-              // backgroundColor: index % 2 ? "#e1effc" : "#ffffff",
+          <Row>
+            <Row>
+              <Col className="column-header2" md={"auto"}>
+                Event type:
+              </Col>
+              <Col className="event-info">{event.dataProperty}</Col>
+            </Row>
 
-              borderBottom: "1px solid #e1effc",
-              // borderRadius: "1px",
-              margin: "3px",
-            }}
-          >
-            <Col>
-              <h7>{event.eventName}</h7>
-            </Col>
-            <Col>Severity:{event.severity}</Col>
-            <Col>Event details:{event.eventDetail}</Col>
-            <Col>
-              Data value ({event.dataValue}
-              {eventPropertyInfo(event.dataProperty).unit}) is not within limits
-              ({event.limits.min},{event.limits.max}
-              {eventPropertyInfo(event.dataProperty).unit})
-            </Col>
-            <Col>
-              Information: {eventPropertyInfo(event.dataProperty).info}{" "}
-            </Col>
-            <Col> </Col>
+            <Row>
+              <Col className="column-header2" md={"auto"}>
+                Event details:{" "}
+              </Col>
+              <Col className="event-info">
+                {event.eventDetail}
+                <Col className="event-info">
+                  Metric value <b>{event.dataValue}</b> {eventProperty.unit} is
+                  not within limits ({event.limits.min}-{event.limits.max}{" "}
+                  {eventProperty.unit})
+                </Col>
+              </Col>
+            </Row>
+            <Row>
+              <Col className="column-header2" md={"auto"}>
+                Information
+              </Col>
+              <Col className="event-info">{eventProperty.info}</Col>
+            </Row>
           </Row>
         )}
       </Row>
@@ -85,20 +67,24 @@ const EventList = (props) => {
     }
   };
   return (
-    <Container className="datalist-container">
-      {/* <Container className="addEmployee-container"> */}
-      <Row style={{ borderBottom: "2px solid #c6c6c6", marginBottom: "1rem" }}>
+    <>
+      <Row style={{ borderBottom: "2px solid #c6c6c6", marginTop: "1rem" }}>
         <h5 className="component-title">Events ({events.length})</h5>
       </Row>
       <Col>
-        <Row>
-          <Col className="list-column-header" xs={4}>
+        <Row style={{ backgroundColor: "rgba(34,55,255,0.2)" }}>
+          <Col className="column-header" xs={3}>
             Date
           </Col>
-          <Col className="list-column-header" xs={2}>
+          <Col className="column-header" xs={3}>
+            Event
+          </Col>
+          <Col className="column-header" xs={2}>
             Severity
           </Col>
         </Row>
+      </Col>
+      <Container className="datalist-container">
         <div className="list-table">
           {events.length > 0 &&
             events.map((e, index) => {
@@ -124,27 +110,32 @@ const EventList = (props) => {
                   }}
                   onClick={handleClick}
                 >
-                  <Col xs={4}>{e.event.created}</Col>
-                  <Col xs={4}>{e.event.eventData.eventName}</Col>
-                  <Col xs={4}>{e.event.eventData.severity}</Col>
-
+                  <Col xs={3}>{e.event.data.datetime}</Col>
+                  <Col xs={3}>{e.event.eventData.dataProperty}</Col>
                   <Col
-                    style={{ justifyContent: "flex-end", display: "flex" }}
+                    style={{
+                      background: severityColor(e.event.eventData.severity),
+                      color: "#000",
+                    }}
                     xs={2}
                   >
+                    {e.event.eventData.severity}
+                  </Col>
+
+                  <Col style={{ justifyContent: "flex-end", display: "flex" }}>
                     {focusedIndex === index ? "⯅" : "⯆"}
                   </Col>
                   {focusedIndex === index && (
-                    <Container>
+                    <>
                       <EventDetail event={e.event.eventData} />
-                    </Container>
+                    </>
                   )}
                 </Row>
               );
             })}
         </div>
-      </Col>
-    </Container>
+      </Container>
+    </>
   );
 };
 
